@@ -1,0 +1,39 @@
+type Mutation {
+  createTask(user_id: ID!, description: String!, status: String!): Task! @create
+  updateTask(id: ID!, status: String): Task! @update(columns: ["status"])
+  deleteTask(id: ID! @whereKey): Task! @delete
+  deleteAllTasks: String @field(resolver: "App\\GraphQL\\Mutations\\TaskMutator@deleteAll")
+
+  register(name: String!, email: String!, password: String!): AuthPayload! @field(resolver: "App\\GraphQL\\Mutations\\AuthMutator@register")
+  login(email: String! @rules(apply: ["required", "email"]) password: String! @rules(apply: ["required"])): AuthPayload! @field(resolver: "App\\GraphQL\\Mutations\\AuthMutator@login")
+  logout: MessagePayload! @field(resolver: "App\\GraphQL\\Mutations\\AuthMutator@logout")
+}
+type Task {
+  id: ID!
+  description: String!
+  status: String!
+  user: User @belongsTo
+}
+
+type User {
+  id: ID!
+  name: String!
+  email: String!
+  tasks: [Task!]! @hasMany
+}
+
+type Query {
+  users: [User!]! @paginate(defaultCount: 10)
+  user: User!
+  tasks(status: String @eq): [Task!]! @all
+}
+
+type AuthPayload {
+  user: User!
+  token: String!
+}
+
+type MessagePayload {
+  message: String!
+}
+
