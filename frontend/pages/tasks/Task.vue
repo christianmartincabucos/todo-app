@@ -1,33 +1,38 @@
 <script lang="ts" setup>
-    import { ref, computed, watch, watchEffect } from 'vue';
-    import type { Task, TaskQueryResult, CreateTaskMutationResult } from '../types'; 
-    import { TASKS_QUERY } from '../graphql/tasks.query';
-    import { CREATE_TASK_MUTATION } from '../graphql/addTask.mutation';
-    import { DELETE_TASK_MUTATION } from '../graphql/deleteTask.mutation';
-    import { DELETE_ALL_TASKS_MUTATION } from '../graphql/deleteAllTasks.mutation';
-    import { UPDATE_TASK_MUTATION } from '../graphql/updateTask.mutation';
+    import { ref, computed, watch, watchEffect, onMounted } from 'vue';
+    import type { Task, TaskQueryResult } from '@/types'; 
+    import { TASKS_QUERY } from '@/graphql/task.queries';
+    import { 
+        CREATE_TASK_MUTATION, 
+        DELETE_TASK_MUTATION, 
+        DELETE_ALL_TASKS_MUTATION, 
+        UPDATE_TASK_MUTATION 
+    } from '@/graphql/task.mutations';
 
     const newTask = ref<string>('');
     const queryVariables = ref({ limit: 5 });
 
-    const { result } = useQuery<TaskQueryResult>(TASKS_QUERY, {status:"todo"});
+    const { result } = useQuery<TaskQueryResult>(TASKS_QUERY, { status: "todo" });
     const tasks = ref<Task[]>([]);
 
-    
-    // Reactive effect to update tasks when query results change
-    console.log(result.value?.tasks);
-    watchEffect(() => {
+    watch(() => result.value?.tasks, (newTasks) => {
+        if (newTasks) {
+            tasks.value = newTasks.map(task => ({ ...task }));
+        }
+    }, { deep: true });
+
+    onMounted(() => {
         if (result.value?.tasks) {
             tasks.value = result.value.tasks.map(task => ({ ...task }));
         }
     });
+
     const addTask = async () => {
         const trimmedTask = newTask.value.trim();
         if (trimmedTask) {
             try {
                 const { mutate: createTask } = useMutation(CREATE_TASK_MUTATION);
                 const result = await createTask({
-                    user_id: 1,
                     description: trimmedTask,
                     status: 'todo'
                 });

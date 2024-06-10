@@ -1,11 +1,25 @@
 type Mutation {
-  createTask(user_id: ID!, description: String!, status: String!): Task! @create
-  updateTask(id: ID!, status: String): Task! @update(columns: ["status"])
-  deleteTask(id: ID! @whereKey): Task! @delete
-  deleteAllTasks: String @field(resolver: "App\\GraphQL\\Mutations\\TaskMutator@deleteAll")
+  createTask(description: String!, status: String!): Task! @create
+    @inject(context: "user.id", name: "user_id")
+    @guard  
+  updateTask(id: ID!, status: String): Task! @update(columns: ["status"]) @guard
+  deleteTask(id: ID! @whereKey): Task! @delete @guard
+  deleteAllTasks: String @field(resolver: "App\\GraphQL\\Mutations\\TaskMutator@deleteAll") @guard
 
-  register(name: String!, email: String!, password: String!): AuthPayload! @field(resolver: "App\\GraphQL\\Mutations\\AuthMutator@register")
-  login(email: String! @rules(apply: ["required", "email"]) password: String! @rules(apply: ["required"])): AuthPayload! @field(resolver: "App\\GraphQL\\Mutations\\AuthMutator@login")
+  register(
+    name: String!, 
+    email: String!, 
+    password: String!
+  ): AuthPayload! @field(resolver: "App\\GraphQL\\Mutations\\AuthMutator@register")
+  @validator(class: "App\\GraphQL\\Validators\\RegisterValidator")
+
+  login(
+    email: String! 
+    password: String!
+  ):  
+  AuthPayload! @field(resolver: "App\\GraphQL\\Mutations\\AuthMutator@login") 
+  @validator(class: "App\\GraphQL\\Validators\\LoginValidator")
+  
   logout: MessagePayload! @field(resolver: "App\\GraphQL\\Mutations\\AuthMutator@logout")
 }
 type Task {
@@ -23,9 +37,9 @@ type User {
 }
 
 type Query {
-  users: [User!]! @paginate(defaultCount: 10)
-  user: User!
-  tasks(status: String @eq): [Task!]! @all
+  users: [User!]! @paginate(defaultCount: 10) 
+  user: User! @guard
+  tasks(status: String @eq): [Task!]! @all @guard
 }
 
 type AuthPayload {

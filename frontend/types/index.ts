@@ -18,3 +18,6 @@ export interface CreateTaskMutationResult {
     createTask: Task;
 }
   
+// export interface LoginMutationResult {
+//     login:
+// }
