@@ -24,10 +24,8 @@ const handleRegister = async () => {
       return errorMessage.value = "Confirm Password is required";
     }
 
-    // Reset error message
     errorMessage.value = '';
 
-    // Perform registration mutation
     const { mutate: register } = useMutation(REGISTRATION_MUTATION);
     const result = await register({
       name: form.value.name,
@@ -36,22 +34,17 @@ const handleRegister = async () => {
       password_confirmation: form.value.password_confirmation,
     });
 
-    // Check if the registration was successful and the token is received
     if (result.data && result.data.register && result.data.register.token) {
-      // Set the token in a cookie
       const token = useCookie('auth-token');
       token.value = result.data.register.token;
 
-      // Redirect to the tasks page
       router.push('/tasks');
     } else {
-      // Handle case where token is not received
       console.error('Registration successful but no token received');
     }
   } catch (e) {
-    // Handle errors from the registration process
-    console.error('Error during registration:', e);
     errorMessage.value = 'An error occurred during registration. Please try again.';
+    console.error('Error during registration:', e);
   }
 }
 
@@ -68,8 +61,8 @@ const handleRegister = async () => {
           variant="outlined"
           prominent
           class="my-2"
-          :text="errorMesssage"
-          v-if="errorMesssage"
+          :text="errorMessage"
+          v-if="errorMessage"
         ></v-alert>
       <div class="text-subtitle-1 text-medium-emphasis">Name</div>
 

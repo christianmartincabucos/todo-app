@@ -63,16 +63,25 @@
 </template>
 <script setup>
 import { ref } from 'vue';
-import { useCookie, navigateTo } from 'nuxt/app';
+import { useCookie, navigateTo,  } from 'nuxt/app';
+import { useApolloClient } from '@vue/apollo-composable'
 
+const isAuthenticated = ref(false);
 const authToken = useCookie('auth-token');
-const isAuthenticated = computed(() => !!authToken.value);
+
+const apolloClient = useApolloClient();
+
+watchEffect(() => {
+  isAuthenticated.value = !!authToken.value;
+});
 
 const logout = async () => {
   authToken.value = null;
-  isAuthenticated.value = false;
+
+  await apolloClient.client.clearStore();
 
   navigateTo('/login');
 };
 </script>
+
 

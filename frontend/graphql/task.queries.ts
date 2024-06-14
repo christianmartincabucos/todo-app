@@ -12,3 +12,17 @@ export const TASKS_QUERY = gql`
           }
       }
 }`
+
+export const GET_MY_TODO_TASKS = gql`
+  query GetMyTodoTasks($status: String!) {
+    me {
+      id
+      tasks(status: $status) {
+        id
+        description
+        status
+      }
+    }
+  }
+`;
+

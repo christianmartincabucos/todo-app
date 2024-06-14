@@ -1,33 +1,31 @@
 <script lang="ts" setup>
-    import { ref, computed, watch, watchEffect, onMounted } from 'vue';
+    import { ref, computed, watch, watchEffect, onBeforeMount, onMounted, onActivated } from 'vue';
     import type { Task, TaskQueryResult } from '@/types'; 
-    import { TASKS_QUERY } from '@/graphql/task.queries';
+    import { TASKS_QUERY, GET_MY_TODO_TASKS } from '@/graphql/task.queries';
     import { 
         CREATE_TASK_MUTATION, 
         DELETE_TASK_MUTATION, 
         DELETE_ALL_TASKS_MUTATION, 
         UPDATE_TASK_MUTATION 
     } from '@/graphql/task.mutations';
+    import { useCookie } from 'nuxt/app';
+    import { useMutation, useQuery } from '@vue/apollo-composable';
 
-    const newTask = ref<string>('');
+    const newTask = ref<String>('');
     const queryVariables = ref({ limit: 5 });
+    const errorMessage = ref<String>('');
 
-    const { result } = useQuery<TaskQueryResult>(TASKS_QUERY, { status: "todo" });
-    const tasks = ref<Task[]>([]);
-
-    watch(() => result.value?.tasks, (newTasks) => {
-        if (newTasks) {
-            tasks.value = newTasks.map(task => ({ ...task }));
-        }
-    }, { deep: true });
-
+    const tasks = ref<Task[] | undefined>([]);
+    const { result } = useQuery<TaskQueryResult>(GET_MY_TODO_TASKS, { status: "todo" });
     onMounted(() => {
-        tasks.value = [];
-        if (result.value?.tasks) {
-            tasks.value = result.value.tasks.map(task => ({ ...task }));
+        if (result.value?.me.tasks) {
+            tasks.value = [];
+            tasks.value = result.value.me.tasks.map(task => ({ ...task }));
         }
-    });
-
+    })
+    watch(result, value => {
+        tasks.value = value.me.tasks.map(task => ({ ...task }));
+    })
     const addTask = async () => {
         const trimmedTask = newTask.value.trim();
         if (trimmedTask) {
@@ -38,13 +36,18 @@
                     status: 'todo'
                 });
                 newTask.value = '';
-                tasks.value.push(result?.data.createTask);
-                // console.log(data);
+                errorMessage.value = '';
+                tasks.value?.push(result?.data.createTask);
             } catch (e) {
-                console.error('Error adding task:', e);
+                // Extract the error message from the GraphQL error response
+                const errMessage = e?.graphQLErrors?.[0]?.message || 'An unexpected error occurred.';
+                console.log('Error adding task:', errMessage);
+                errorMessage.value = errMessage;
+                // Display the error message to the user
             }
         }
     };
+
 
     const doneTasksCount = computed(() => {
         return tasks.value?.filter(task => task.status === 'done').length;
@@ -52,6 +55,7 @@
 
     // Watch for changes in task statuses
     watch(tasks, (newTasks, oldTasks) => {
+        console.log(newTasks, oldTasks);
         console.log('Tasks have been updated.');
         // You can perform additional actions here if needed
     });
@@ -107,12 +111,20 @@
 <template>
     <v-row align="center" justify="center">
         <v-col cols="12" sm="8" md="6">
+            <v-alert
+          border="top"
+          type="error"
+          class="my-2"
+          :text="errorMessage"
+          v-if="errorMessage"
+        ></v-alert>
             <v-card class="mx-auto my-6" outlined rounded="lg">
+                
                 <div class="d-flex justify-space-between">
                     <div>
                     </div>
                     <div>
-                    <v-badge color="white" :content="tasks.length" class="ma-2">
+                    <v-badge color="white" :content="tasks?.length" class="ma-2">
                         <v-btn color="primary" rounded="xl">Tasks</v-btn>
                     </v-badge>
                     <v-badge color="white" :content="doneTasksCount" class="ma-2">

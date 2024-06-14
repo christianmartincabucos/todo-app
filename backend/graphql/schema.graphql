@@ -1,7 +1,11 @@
 type Mutation {
-  createTask(description: String!, status: String!): Task! @create
-    @inject(context: "user.id", name: "user_id")
-    @guard  
+createTask(
+  description: String!
+  status: String!
+): Task!
+  @guard
+  @field(resolver: "App\\GraphQL\\Mutations\\TaskMutator@createTask")
+
   updateTask(id: ID!, status: String): Task! @update(columns: ["status"]) @guard
   deleteTask(id: ID! @whereKey): Task! @delete @guard
   deleteAllTasks: String @field(resolver: "App\\GraphQL\\Mutations\\TaskMutator@deleteAll") @guard
@@ -34,13 +38,14 @@ type User {
   id: ID!
   name: String!
   email: String!
-  tasks: [Task!]! @hasMany
+  tasks(status: String @eq): [Task!]! @hasMany
 }
 
 type Query {
   users: [User!]! @paginate(defaultCount: 10) 
   user: User! @guard
-  tasks(status: String @eq): [Task!]! @all @guard
+  me: User @auth
+  tasks(status: String @eq): [Task!]! @auth
 }
 
 type AuthPayload {

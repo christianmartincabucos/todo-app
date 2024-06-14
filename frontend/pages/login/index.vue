@@ -20,12 +20,17 @@ const handleLogin = async () => {
         email: email.value,
         password: password.value,
       });
-      console.log(result.data.login.token);
-      const token = useCookie('auth-token'); // useCookie new hook in nuxt 3
+      if (result.data && result.data.login && result.data.login.token) {
+      const token = useCookie('auth-token');
       token.value = result.data.login.token;
+
       router.push('/tasks');
+    } else {
+      console.error('Login successful but no token received');
+    }
   } catch (e) {
-      console.error('Error login :', e);
+    errorMessage.value = 'An error occurred during login. Please try again.';
+    console.error('Error during login:', e);
   }
 }
 </script>

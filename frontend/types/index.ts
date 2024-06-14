@@ -2,7 +2,6 @@ export interface Task {
     id: string;
     description: string;
     status: string;
-    user: User;
 }
 
 export interface User {
@@ -11,7 +10,9 @@ export interface User {
 }
 
 export interface TaskQueryResult {
-    tasks: Task[];
+    me: {
+        tasks: Task[];
+    }
 }
   
 export interface CreateTaskMutationResult {

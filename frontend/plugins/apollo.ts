@@ -1,12 +1,15 @@
 export default defineNuxtPlugin((nuxtApp) => {
-  // access cookie for auth
+  // Access cookie for auth
   const cookie = useCookie('auth-token');
 
-  nuxtApp.hook('apollo:auth', ({ client, token }) => {
-    // `client` can be used to differentiate logic on a per client basis.
-    // apply apollo client token
-    if(cookie.value) {
-      token.value = cookie.value;
-    }
-  })
-})
+  // Watch the cookie and update the Apollo Client's token reactively
+  watchEffect(() => {
+    nuxtApp.hook('apollo:auth', ({ client, token }) => {
+      // `client` can be used to differentiate logic on a per client basis.
+      // Apply the latest token to the Apollo Client
+      if (cookie.value) {
+        token.value = cookie.value;
+      }
+    });
+  });
+});
