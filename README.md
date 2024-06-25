@@ -1,5 +1,68 @@
 
----
+# Fullstack Developer Test Task Documentation
+
+## Overview
+
+The Fullstack Developer Test Task is a simple To-Do list management system built with Laravel (backend) and NuxtJS (frontend). Users can view, create, update, and delete tasks. Here's what the completed application includes:
+
+1. **Backend (Laravel with GraphQL):**
+
+   - **Authentication:**
+     - Users can log in and log out.
+     - Only authenticated users can access the API.
+
+   - **Task Management:**
+     - A `Task` model with states: `todo` and `done`.
+     - Each task belongs to a specific user.
+
+   - **GraphQL API:**
+     - Queries:
+       - `tasks`: Fetch all tasks for the authenticated user.
+     - Mutations:
+       - `register`: Register the user.
+       - `login`: Authenticate the user.
+       - `logout`: Log out the user.
+       - `createTask`: Create a new task.
+       - `updateTask`: Update an existing task.
+       - `deleteTask`: Delete a task.
+       - `deleteAllTasks`: Delete all tasks.
+
+   - **Unit Tests:**
+     - Unit tests cover the API for `User` and the `Task` model.
+
+   - **Constraints:**
+     - Users can only manage their own tasks.
+     - Task names can be the same for different users.
+
+   - **Docker Setup:**
+     - The backend is Dockerized for easy setup across different machines.
+
+2. **Frontend (NuxtJS):**
+
+   - **Features:**
+     - ES6 features are used.
+     - Integration with the Laravel backend.
+     - Vuetify design framework for a polished UI.
+
+   - **Vue.js Concepts and CSS/SASS:**
+     - Demonstrates understanding of Vue.js concepts.
+     - Clean and organized CSS/SASS structure.
+
+   - **Readable Code Structure:**
+     - Code is well-organized and follows best practices.
+
+   - **Error Handling and Validation:**
+     - Basic error handling for form submissions and API requests.
+
+   - **Project Documentation:**
+     - README file with setup instructions.
+     - Any other relevant documentation.
+
+   - **Additional Notes:**
+     - Describes approach, challenges, and solutions.
+     - Includes examples of text inputs and their summaries.
+     - Outlines ideas for future enhancements.
+
 
 # To-Do List Management System
 
